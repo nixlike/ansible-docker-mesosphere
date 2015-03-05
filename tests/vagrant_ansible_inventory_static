@@ -1,0 +1,25 @@
+[mesosphere:children]
+zookeeper
+mesos-master
+mesos-slave
+marathon
+
+[zookeeper]
+192.168.50.4 zoo_id=1
+192.168.50.5 zoo_id=2
+192.168.50.6 zoo_id=3
+
+[mesos-master]
+192.168.50.4
+192.168.50.5
+192.168.50.6
+
+[marathon]
+192.168.50.4
+192.168.50.5
+192.168.50.6
+
+[mesos-slave]
+192.168.50.4
+192.168.50.5
+192.168.50.6
