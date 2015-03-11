@@ -43,6 +43,7 @@
     - mesosphere/marathon
     - redjack/mesos-master
     - jplock/zookeeper
+    - tomaskral/chronos
   tags:
     - mesosphere_master
 
@@ -52,6 +53,7 @@
     - mesosphere/marathon
     - redjack/mesos-master
     - jplock/zookeeper
+    - tomaskral/chronos
   tags:
     - mesosphere_master
     - mesosphere_slave
@@ -76,6 +78,11 @@
   docker: docker_api_version={{docker_api_version}} restart_policy=always restart_policy_retry=100 image=mesosphere/marathon net=host ports={{marathon_port}} env="host.name={{inventory_hostname}}" command="--master {{zookeeper_url}} --zk {{zookeeper_marathon_url}} --hostname {{inventory_hostname}}"
   tags:
     - mesosphere_master
+
+#- name: Make sure docker chronos image is running
+#  docker: docker_api_version={{docker_api_version}} restart_policy=always restart_policy_retry=100 image=tomaskral/chronos net=host command="--master {{zookeeper_url}} --zk_hosts {{zookeeper_url}} --http_port 8081"
+#  tags:
+#    - mesosphere_master
 
 - name: Make sure docker mesos slave image is running
   docker: docker_api_version={{docker_api_version}} restart_policy=always restart_policy_retry=100 image=redjack/mesos-slave net=host command="mesos-slave --master={{zookeeper_url}} --hostname={{inventory_hostname}} --ip={{inventory_hostname}}" 
