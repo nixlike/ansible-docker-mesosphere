@@ -7,8 +7,10 @@ mesos_master_log: /var/log
 mesos_cluster_name: test1
 mesos_master_volumes: /opt/mesos-master/replicated_log:/tmp/replicated_log
 #zookeeper_url: "zk://{{inventory_hostname}}:{{zoo_client_port}}/mesos"
-zookeeper_url: 'zk://192.168.50.4:2181,192.168.50.5:2181,192.168.50.6:2181/mesos'
+master_nodes: "192.168.50.4:2181,192.168.50.5:2181,192.168.50.6:2181"
+zookeeper_url: 'zk://{{master_nodes}}/mesos'
 zookeeper_ports: "2181:2181,2888:2888,3888:3888"
+mesos_quorum: "2"
 
 #zookeeper container internal variables:
 zoo_client_port: 2181
@@ -22,4 +24,4 @@ zoo_id: 1
 # marathon 
 marathon_port: '8080:8080'
 #zookeeper_marathon_url: "zk://{{inventory_hostname}}:{{zoo_client_port}}/marathon"
-zookeeper_marathon_url: 'zk://192.168.50.4:2181,192.168.50.5:2181,192.168.50.6:2181/marathon'
+zookeeper_marathon_url: 'zk://{{master_nodes}}/marathon'

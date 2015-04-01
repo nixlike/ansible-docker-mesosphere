@@ -44,8 +44,10 @@
     - redjack/mesos-master
     - jplock/zookeeper
     - tomaskral/chronos
+    - redjack/mesos-slave
   tags:
     - mesosphere_master
+    - mesosphere_slave
 
 - name: Make sure mesosphere container {{ item }} is absent
   docker: docker_api_version={{docker_api_version}} image={{item}} state=absent
@@ -54,6 +56,7 @@
     - redjack/mesos-master
     - jplock/zookeeper
     - tomaskral/chronos
+    - redjack/mesos-slave
   tags:
     - mesosphere_master
     - mesosphere_slave
@@ -70,7 +73,7 @@
     - mesosphere_master
 
 - name: Make sure docker mesos master image is running
-  docker: docker_api_version={{docker_api_version}} restart_policy=always restart_policy_retry=100 volumes={{mesos_master_volumes}} image=redjack/mesos-master net=host ports={{mesos_master_port}} env="MESOS_LOG_DIR={{mesos_master_log}}" command="mesos-master --work_dir=/tmp --quorum=2 --zk={{zookeeper_url}} --hostname={{inventory_hostname}} --ip={{inventory_hostname}} --cluster={{mesos_cluster_name}} --registry_fetch_timeout=3mins"
+  docker: docker_api_version={{docker_api_version}} restart_policy=always restart_policy_retry=100 volumes={{mesos_master_volumes}} image=redjack/mesos-master net=host ports={{mesos_master_port}} env="MESOS_LOG_DIR={{mesos_master_log}}" command="mesos-master --work_dir=/tmp --quorum={{mesos_quorum}} --zk={{zookeeper_url}} --hostname={{inventory_hostname}} --ip={{inventory_hostname}} --cluster={{mesos_cluster_name}} --registry_fetch_timeout=3mins"
   tags:
     - mesosphere_master
 
