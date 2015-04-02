@@ -32,6 +32,12 @@
   tags:
     - mesosphere_master
 
+- name: Set system limits
+  template: src=mesosphere.j2 dest=/etc/security/limits.d/91-mesosphere.conf owner=root group=root
+  tags:
+    - mesosphere_master
+    - mesosphere_slave
+
 - name: Configure zookeeper
   template: src=zoo.cfg.j2 dest={{zoo_cont_data_path}}/conf/zoo.cfg owner=root group=root
   tags:
@@ -45,6 +51,7 @@
     - jplock/zookeeper
     - tomaskral/chronos
     - redjack/mesos-slave
+    - nixlike/ansible-docker-mesosphere
   tags:
     - mesosphere_master
     - mesosphere_slave
@@ -57,38 +64,39 @@
     - jplock/zookeeper
     - tomaskral/chronos
     - redjack/mesos-slave
+    - nixlike/ansible-docker-mesosphere
   tags:
     - mesosphere_master
     - mesosphere_slave
 
 - name: Make sure docker zookeeper image is running
-  docker: docker_api_version={{docker_api_version}} restart_policy=always restart_policy_retry=100 image=jplock/zookeeper net=host volumes={{zoo_cont_data_path}}/myid:{{data_dir}}/myid:ro,{{zoo_cont_data_path}}/conf/zoo.cfg:/opt/zookeeper-3.4.5/conf/zoo.cfg:ro ports={{zookeeper_ports}}
+  docker: docker_api_version={{docker_api_version}} restart_policy=always restart_policy_retry=100 image=nixlike/ansible-docker-mesosphere net=host volumes={{zoo_cont_data_path}}/myid:{{data_dir}}/myid:ro,{{zoo_cont_data_path}}/conf/zoo.cfg:/etc/zookeeper/conf/zoo.cfg:ro ports={{zookeeper_ports}} command="/opt/mesosphere/zookeeper/bin/zkServer.sh start-foreground /etc/zookeeper/conf/zoo.cfg"
   tags:
     - mesosphere_master
 
 - name: Create mesos registry log if it is empty and ignore error if not!
-  shell: docker run -v {{mesos_master_volumes}} -ti redjack/mesos-master mesos-log initialize --path=/tmp/replicated_log
+  shell: docker run -v {{mesos_master_volumes}} -ti nixlike/ansible-docker-mesosphere mesos-log initialize --path=/tmp/replicated_log
   ignore_errors: yes
   tags:
     - mesosphere_master
 
 - name: Make sure docker mesos master image is running
-  docker: docker_api_version={{docker_api_version}} restart_policy=always restart_policy_retry=100 volumes={{mesos_master_volumes}} image=redjack/mesos-master net=host ports={{mesos_master_port}} env="MESOS_LOG_DIR={{mesos_master_log}}" command="mesos-master --work_dir=/tmp --quorum={{mesos_quorum}} --zk={{zookeeper_url}} --hostname={{inventory_hostname}} --ip={{inventory_hostname}} --cluster={{mesos_cluster_name}} --registry_fetch_timeout=3mins"
+  docker: docker_api_version={{docker_api_version}} restart_policy=always restart_policy_retry=100 volumes={{mesos_master_volumes}} image=nixlike/ansible-docker-mesosphere net=host ports={{mesos_master_port}} env="MESOS_LOG_DIR={{mesos_master_log}}" command="mesos-master --work_dir=/tmp --quorum={{mesos_quorum}} --zk={{zookeeper_url}} --hostname={{inventory_hostname}} --ip={{inventory_hostname}} --cluster={{mesos_cluster_name}} --registry_fetch_timeout=3mins"
   tags:
     - mesosphere_master
 
 - name: Make sure docker marathon image is running
-  docker: docker_api_version={{docker_api_version}} restart_policy=always restart_policy_retry=100 image=mesosphere/marathon net=host ports={{marathon_port}} env="host.name={{inventory_hostname}}" command="--master {{zookeeper_url}} --zk {{zookeeper_marathon_url}} --hostname {{inventory_hostname}}"
+  docker: docker_api_version={{docker_api_version}} restart_policy=always restart_policy_retry=100 image=nixlike/ansible-docker-mesosphere net=host ports={{marathon_port}} env="host.name={{inventory_hostname}}" command="marathon run_jar --master {{zookeeper_url}} --zk {{zookeeper_marathon_url}} --hostname {{inventory_hostname}}"
   tags:
     - mesosphere_master
 
-#- name: Make sure docker chronos image is running
-#  docker: docker_api_version={{docker_api_version}} restart_policy=always restart_policy_retry=100 image=tomaskral/chronos net=host command="--master {{zookeeper_url}} --zk_hosts {{zookeeper_url}} --http_port 8081"
-#  tags:
-#    - mesosphere_master
+- name: Make sure docker chronos image is running
+  docker: docker_api_version={{docker_api_version}} restart_policy=always restart_policy_retry=100 image=nixlike/ansible-docker-mesosphere net=host command="chronos run_jar --master {{zookeeper_url}} --zk_hosts {{zookeeper_url}} --http_port 8081"
+  tags:
+    - mesosphere_master
 
 - name: Make sure docker mesos slave image is running
-  docker: docker_api_version={{docker_api_version}} restart_policy=always restart_policy_retry=100 image=redjack/mesos-slave net=host command="mesos-slave --master={{zookeeper_url}} --hostname={{inventory_hostname}} --ip={{inventory_hostname}}" 
+  docker: docker_api_version={{docker_api_version}} restart_policy=always restart_policy_retry=100 image=nixlike/ansible-docker-mesosphere net=host command="mesos-slave --master={{zookeeper_url}} --hostname={{inventory_hostname}} --ip={{inventory_hostname}}" 
   tags:
     - mesosphere_master
     - mesosphere_slave
