@@ -89,11 +89,9 @@
 
 - file: path={{mesos_slave_dockerd_graph}} state=directory
   tags:
-    - mesosphere_master
     - mesosphere_slave
 
 - name: Make sure docker mesos slave image is running
   docker: docker_api_version={{docker_api_version}}  restart_policy=always restart_policy_retry=100 privileged=yes image=nixlike/ansible-docker-mesosphere net=host volumes=/var/run/docker.sock:/var/run/docker.sock,{{mesos_slave_dockerd_graph}}:/var/lib/docker command="mesos-slave --master={{zookeeper_url}} --hostname={{inventory_hostname}} --ip={{inventory_hostname}} --containerizers='docker,mesos'" 
   tags:
-    - mesosphere_master
     - mesosphere_slave
