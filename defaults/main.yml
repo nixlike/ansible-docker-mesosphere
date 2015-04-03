@@ -23,5 +23,7 @@ zoo_id: 1
 
 # marathon 
 marathon_port: '8080:8080'
-#zookeeper_marathon_url: "zk://{{inventory_hostname}}:{{zoo_client_port}}/marathon"
 zookeeper_marathon_url: 'zk://{{master_nodes}}/marathon'
+
+#mesos_slave
+mesos_slave_dockerd_graph: "/var/lib/docker2"
