@@ -8,5 +8,7 @@ RUN yum -y install mesos chronos marathon mesosphere-zookeeper supervisor docker
 
 RUN sed -ir /ulimit/d /usr/bin/marathon&&sed -ir /ulimit/d /usr/bin/chronos
 
-ADD ./wrapdocker /usr/local/bin/wrapdocker
-RUN chmod +x /usr/local/bin/wrapdocker
+ADD ./prepare /usr/local/bin/prepare
+RUN chmod +x /usr/local/bin/prepare
+
+CMD /usr/local/bin/prepare

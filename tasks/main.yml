@@ -65,6 +65,13 @@
   docker: docker_api_version={{docker_api_version}} restart_policy=always restart_policy_retry=100 image=nixlike/ansible-docker-mesosphere net=host volumes={{zoo_cont_data_path}}/myid:{{data_dir}}/myid:ro,{{zoo_cont_data_path}}/conf/zoo.cfg:/etc/zookeeper/conf/zoo.cfg:ro ports={{zookeeper_ports}} command="/opt/mesosphere/zookeeper/bin/zkServer.sh start-foreground /etc/zookeeper/conf/zoo.cfg" 
   tags:
     - mesosphere_master
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "6"
+
+- name: Make sure docker zookeeper image is running
+  command: docker run -d  --restart=always --net="host" -v {{zoo_cont_data_path}}/myid:{{data_dir}}/myid -v {{zoo_cont_data_path}}/conf/zoo.cfg:/etc/zookeeper/conf/zoo.cfg nixlike/ansible-docker-mesosphere /opt/mesosphere/zookeeper/bin/zkServer.sh start-foreground /etc/zookeeper/conf/zoo.cfg 
+  tags:
+    - mesosphere_master
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "7"
 
 - name: Create mesos registry log if it is empty and ignore error if not!
   shell: docker run -v {{mesos_master_volumes}} -ti nixlike/ansible-docker-mesosphere mesos-log initialize --path=/tmp/replicated_log
