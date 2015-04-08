@@ -10,6 +10,9 @@
     - mesosphere_master
     - mesosphere_slave
 
+- name: Disable SELinux
+  selinux: state=disabled
+
 - file: path={{zoo_cont_data_path}}/conf state=directory
   tags:
     - mesosphere_master
@@ -17,12 +20,6 @@
 
 - yum: name=libselinux-python state=present
   when: ansible_os_family == 'RedHat'
-  tags:
-    - mesosphere_master
-    - mesosphere_slave
-
-- apt: name=libselinux-python state=present
-  when: ansible_os_family == 'Debian'
   tags:
     - mesosphere_master
     - mesosphere_slave
@@ -79,8 +76,9 @@
   tags:
     - mesosphere_master
 
+
 - name: Make sure docker mesos master image is running
-  docker: docker_api_version={{docker_api_version}}  restart_policy=always restart_policy_retry=100 volumes={{mesos_master_volumes}} image=nixlike/ansible-docker-mesosphere net=host ports={{mesos_master_port}} env="MESOS_LOG_DIR={{mesos_master_log}}" command="mesos-master --work_dir=/tmp --quorum={{mesos_quorum}} --zk={{zookeeper_url}} --hostname={{inventory_hostname}} --ip={{inventory_hostname}} --cluster={{mesos_cluster_name}} --registry_fetch_timeout=3mins"
+  docker: docker_api_version={{docker_api_version}}  restart_policy=always restart_policy_retry=100 volumes={{mesos_master_volumes}} image=nixlike/ansible-docker-mesosphere net=host ports={{mesos_master_port}} env="MESOS_LOG_DIR={{mesos_master_log}}" command="mesos-master --work_dir=/tmp --quorum={{mesos_quorum}} --zk={{zookeeper_url}} --hostname={{inventory_hostname}} --ip={{inventory_hostname}} --cluster={{mesos_cluster_name}} --registry_fetch_timeout=5mins"
   tags:
     - mesosphere_master
 
@@ -98,12 +96,14 @@
   tags:
     - mesosphere_slave
 
-#- name: Make sure docker mesos slave image is running
-#  docker: docker_api_version={{docker_api_version}}  restart_policy=always restart_policy_retry=100 privileged=yes image=nixlike/ansible-docker-mesosphere net=host volumes=/var/run/docker.sock:/var/run/docker.sock,{{mesos_slave_dockerd_graph}}:/var/lib/docker command="mesos-slave --master={{zookeeper_url}} --hostname={{inventory_hostname}} --ip={{inventory_hostname}} --containerizers='docker,mesos'" 
-#  tags:
-#    - mesosphere_slave
-
 - name: Make sure docker mesos slave image is running
-  shell: docker run -d --privileged -v /sys:/sys:ro -v /var/run/docker.sock:/var/run/docker.sock -v $(which docker):/bin/docker --restart=always --net="host" nixlike/ansible-docker-mesosphere mesos-slave --master={{zookeeper_url}} --hostname={{inventory_hostname}} --ip={{inventory_hostname}} --containerizers='docker,mesos'
+  shell: docker run -d --privileged -v {{mesos_slave_dockerd_graph}}:/var/lib/docker -e ADD_SERVICE="mesos-slave --master={{zookeeper_url}} --hostname={{inventory_hostname}} --ip={{inventory_hostname}} --containerizers='docker,mesos'" --restart=always --net="host" nixlike/ansible-docker-mesosphere wrap_docker_messos
   tags:
     - mesosphere_slave
+
+- name: restart machine
+  command: reboot
+  ignore_errors: yes
+  tags:
+   - mesosphere_master
+   - mesosphere_slave
