@@ -89,7 +89,7 @@ rm -rf /var/run/docker.pid
 
 docker -d &
 
-if [$ADD_SERVICE]
+if [ -v $ADD_SERVICE ] 
 then
 	echo "Trying $ADD_SERVICE"
 	$ADD_SERVICE && echo "ran $ADD_SERVICE"	
