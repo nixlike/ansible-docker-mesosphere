@@ -1,0 +1,8 @@
+{
+  "id": "cpustressthrottle",
+  "instances": 1,
+  "cpus": 0.01,
+  "mem": 25,
+  "uris": [],
+  "cmd": "time for i in `seq 1 1000000`; do echo 1 > /dev/null ;done"
+}
