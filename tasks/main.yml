@@ -97,7 +97,7 @@
     - mesosphere_slave
 
 - name: Make sure docker mesos slave image is running
-  shell: docker run -d --privileged -v {{mesos_slave_dockerd_graph}}:/var/lib/docker -e ADD_SERVICE="mesos-slave --master={{zookeeper_url}} --hostname={{inventory_hostname}} --ip={{inventory_hostname}} --containerizers=docker,mesos" --restart=always --net="host" nixlike/ansible-docker-mesosphere wrap_docker_messos
+  shell: docker run -d --privileged -v {{mesos_slave_dockerd_graph}}:/var/lib/docker -e ADD_SERVICE="mesos-slave --master={{zookeeper_url}} --hostname={{inventory_hostname}} --ip={{inventory_hostname}} --containerizers=docker,mesos --executor_registration_timeout=30mins" --restart=always --net="host" nixlike/ansible-docker-mesosphere wrap_docker_messos
   tags:
     - mesosphere_slave
 
