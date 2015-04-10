@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: Oleksii Dzhulai
-  description: Docker based zookeeper provisioning using ansible
+  description: Docker based mesosphere provisioning using ansible
   license: Apache 2
   min_ansible_version: 1.2
   #
