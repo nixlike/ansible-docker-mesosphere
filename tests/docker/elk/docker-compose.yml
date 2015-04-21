@@ -1,0 +1,11 @@
+logstash:
+  image: logstash
+  command: logstash -f /config-dir/logstash.conf
+  ports:
+    - "5043:5043"
+  volumes:
+    - logstash.conf:/config-dir/logstash.conf
+    - testcerts:/etc/ssl
+
+elasticsearch:
+  build: .
